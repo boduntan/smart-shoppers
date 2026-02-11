@@ -1,6 +1,6 @@
 # Emraay Omni Chatbot
 
-Modern React + TypeScript integration application that connects the Staples Smart Shopper UI component with the backend API.
+Modern React + TypeScript integration application that connects the Emraay Smart Shopper UI component with the backend API.
 
 ## 🏗️ Architecture
 
@@ -61,8 +61,8 @@ cp .env.example .env
 
 Edit `.env` if needed (defaults to hosted backend):
 ```env
-VITE_API_BASE_URL=https://api.dev.aks.staplescan.com/ecommerce/chatbot/v1.0/api
-VITE_APP_TITLE=Staples Smart Shopper
+VITE_API_BASE_URL=https://localhost/ecommerce/chatbot/v1.0/api
+VITE_APP_TITLE=Emraay Smart Shopper
 VITE_APP_LOCALE=en-CA
 ```
 
@@ -100,7 +100,7 @@ npm run preview
 
 ## 🔌 API Integration
 
-The app connects to the hosted Staples ChatBot backend:
+The app connects to the hosted Emraay ChatBot backend:
 
 **Base URL:** `https://api.dev.aks.staplescan.com/ecommerce/chatbot/v1.0/api`
 
