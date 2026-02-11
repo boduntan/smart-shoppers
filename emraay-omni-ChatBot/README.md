@@ -1,4 +1,4 @@
-# Staples Omni Chatbot
+# Emraay Omni Chatbot
 
 Modern React + TypeScript integration application that connects the Staples Smart Shopper UI component with the backend API.
 
@@ -17,7 +17,7 @@ Modern React + TypeScript integration application that connects the Staples Smar
 ## 📁 Project Structure
 
 ```
-staples-omni-chatbot/
+Emraay-omni-chatbot/
 ├── src/
 │   ├── components/           # React components
 │   │   └── ChatWidget/      # Chat widget integration
@@ -159,8 +159,8 @@ Output will be in `dist/` directory, optimized for production.
 
 ## 🔗 Related Projects
 
-- **staples-hk**: UI component library (web components)
-- **Staples-ChatBot**: Backend API service
+- **Emraay-hk**: UI component library (web components)
+- **Emraay-ChatBot**: Backend API service
 
 ## 👨‍💻 Author
 
