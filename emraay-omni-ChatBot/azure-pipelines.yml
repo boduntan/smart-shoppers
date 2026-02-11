@@ -1,0 +1,283 @@
+trigger:
+  branches:
+    include:
+      - main
+      - develop
+  paths:
+    include:
+      - src/**
+      - public/**
+      - index.html
+      - package.json
+      - vite.config.ts
+
+variables:
+  azureServiceConnection: "staples-canada-ulc-nonp"
+  subscriptionId: "880931d9-0eca-435b-bf7e-97eb8dc9a70a"
+  
+  storageAccountName: 'chatbotdevweb1'
+  storageAccountResourceGroup: 'chatbot-dev-rg'
+  blobContainerName: '$web'
+  deploymentPath: 'chatbot'  
+  
+  nodeVersion: '18.x'
+  buildConfiguration: 'production'
+  
+stages:
+  - stage: Build
+    displayName: 'Build React Application'
+    jobs:
+      - job: BuildJob
+        displayName: 'Build Staples Omni ChatBot'
+        pool:
+          vmImage: 'ubuntu-latest'
+        
+        steps:
+          - checkout: self
+            displayName: 'Checkout repository'
+          
+          - task: NodeTool@0
+            displayName: 'Install Node.js'
+            inputs:
+              versionSpec: $(nodeVersion)
+          
+          - task: npmAuthenticate@0
+            displayName: 'Authenticate to Azure Artifacts'
+            inputs:
+              workingFile: '.npmrc'
+          
+          - script: |
+              echo "Installing dependencies from Azure Artifacts..."
+              npm ci
+            displayName: 'Install Dependencies'
+          
+          - script: |
+              echo "Running TypeScript type check..."
+              npm run type-check
+            displayName: 'TypeScript Type Check'
+          
+          - script: |
+              echo "Running tests..."
+              npm run test:coverage
+            displayName: 'Run Tests with Coverage'
+            continueOnError: true
+          
+          - script: |
+              echo "Building application..."
+              echo "Build configuration: $(buildConfiguration)"
+              npm run build
+            displayName: 'Build React Application'
+            env:
+              VITE_API_BASE_URL: 'https://api.dev.aks.staplescan.com/ecommerce/chatbot/v1.0/api'
+              VITE_API_MODE: 'live'
+              VITE_APP_TITLE: 'Staples Smart Shopper'
+              VITE_APP_LOCALE: 'en-CA'
+          
+          - script: |
+              echo "Verifying build output..."
+              if [ ! -d "dist" ]; then
+                echo "Error: dist folder not found!"
+                exit 1
+              fi
+              echo "Build artifacts:"
+              ls -la dist/
+            displayName: 'Verify Build Output'
+          
+          - task: PublishBuildArtifacts@1
+            displayName: 'Publish Build Artifacts'
+            inputs:
+              PathtoPublish: 'dist'
+              ArtifactName: 'chatbot-build'
+              publishLocation: 'Container'
+
+  - stage: Deploy
+    displayName: 'Deploy to Azure Storage'
+    dependsOn: Build
+    condition: succeeded()
+    jobs:
+      - deployment: DeployToStorage
+        displayName: 'Deploy to Blob Storage'
+        pool:
+          vmImage: 'ubuntu-latest'
+        environment: 'development'
+        
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - download: current
+                  artifact: chatbot-build
+                  displayName: 'Download Build Artifacts'
+                
+                - task: AzureCLI@2
+                  displayName: 'Set subscription and verify access'
+                  inputs:
+                    azureSubscription: $(azureServiceConnection)
+                    scriptType: 'bash'
+                    scriptLocation: 'inlineScript'
+                    inlineScript: |
+                      echo "Setting subscription to: $(subscriptionId)"
+                      az account set --subscription $(subscriptionId)
+                      
+                      echo "Verifying subscription access..."
+                      CURRENT_SUB=$(az account show --query "id" -o tsv)
+                      echo "Current subscription: $CURRENT_SUB"
+                      
+                      if [ "$CURRENT_SUB" != "$(subscriptionId)" ]; then
+                        echo "Error: Failed to set subscription to $(subscriptionId)"
+                        echo "Available subscriptions:"
+                        az account list --query "[].{Name:name, Id:id, State:state}" -o table
+                        exit 1
+                      fi
+                      
+                      echo "Verifying storage account access..."
+                      az storage account show \
+                        --name $(storageAccountName) \
+                        --resource-group $(storageAccountResourceGroup) \
+                        --query "name" -o tsv
+                
+                - task: AzureCLI@2
+                  displayName: 'Verify build artifacts'
+                  inputs:
+                    azureSubscription: $(azureServiceConnection)
+                    scriptType: 'bash'
+                    scriptLocation: 'inlineScript'
+                    inlineScript: |
+                      BUILD_PATH="$(Pipeline.Workspace)/chatbot-build"
+                      
+                      if [ ! -d "$BUILD_PATH" ]; then
+                        echo "Error: Build artifacts not found at $BUILD_PATH"
+                        exit 1
+                      fi
+                      
+                      echo "Build artifacts found:"
+                      ls -la "$BUILD_PATH"
+                      
+                      # Check for index.html
+                      if [ ! -f "$BUILD_PATH/index.html" ]; then
+                        echo "Error: index.html not found in build output!"
+                        exit 1
+                      fi
+                      echo "✓ index.html verified"
+                
+                - task: AzureCLI@2
+                  displayName: 'Upload files to blob storage (/chatbot folder)'
+                  inputs:
+                    azureSubscription: $(azureServiceConnection)
+                    scriptType: 'bash'
+                    scriptLocation: 'inlineScript'
+                    inlineScript: |
+                      az account set --subscription $(subscriptionId)
+                      
+                      BUILD_PATH="$(Pipeline.Workspace)/chatbot-build"
+                      DESTINATION="${blobContainerName}/$(deploymentPath)"
+                      
+                      echo "Uploading files to: $DESTINATION"
+                      echo "Source: $BUILD_PATH"
+                      
+                      # Upload all files to /chatbot subdirectory
+                      az storage blob upload-batch \
+                        --account-name $(storageAccountName) \
+                        --destination "$DESTINATION" \
+                        --source "$BUILD_PATH" \
+                        --overwrite true \
+                        --content-cache-control "public, max-age=31536000" \
+                        --pattern "*"
+                      
+                      # Set shorter cache for HTML files
+                      az storage blob upload-batch \
+                        --account-name $(storageAccountName) \
+                        --destination "$DESTINATION" \
+                        --source "$BUILD_PATH" \
+                        --overwrite true \
+                        --content-cache-control "public, max-age=3600" \
+                        --pattern "*.html"
+                      
+                      echo "✓ Upload completed successfully to /chatbot folder"
+                
+                - task: AzureCLI@2
+                  displayName: 'Set correct MIME types for assets'
+                  inputs:
+                    azureSubscription: $(azureServiceConnection)
+                    scriptType: 'bash'
+                    scriptLocation: 'inlineScript'
+                    inlineScript: |
+                      az account set --subscription $(subscriptionId)
+                      
+                      echo "Setting MIME types for JavaScript files..."
+                      for blob in $(az storage blob list \
+                        --account-name $(storageAccountName) \
+                        --container-name '$(blobContainerName)' \
+                        --prefix '$(deploymentPath)/' \
+                        --query "[?ends_with(name, '.js')].name" -o tsv); do
+                        az storage blob update \
+                          --account-name $(storageAccountName) \
+                          --container-name '$(blobContainerName)' \
+                          --name "$blob" \
+                          --content-type "application/javascript"
+                      done
+                      
+                      echo "Setting MIME types for CSS files..."
+                      for blob in $(az storage blob list \
+                        --account-name $(storageAccountName) \
+                        --container-name '$(blobContainerName)' \
+                        --prefix '$(deploymentPath)/' \
+                        --query "[?ends_with(name, '.css')].name" -o tsv); do
+                        az storage blob update \
+                          --account-name $(storageAccountName) \
+                          --container-name '$(blobContainerName)' \
+                          --name "$blob" \
+                          --content-type "text/css"
+                      done
+                      
+                      echo "✓ MIME types updated"
+                
+                - task: AzureCLI@2
+                  displayName: 'Verify deployed files'
+                  inputs:
+                    azureSubscription: $(azureServiceConnection)
+                    scriptType: 'bash'
+                    scriptLocation: 'inlineScript'
+                    inlineScript: |
+                      az account set --subscription $(subscriptionId)
+                      
+                      echo "Listing files in /chatbot folder:"
+                      az storage blob list \
+                        --account-name $(storageAccountName) \
+                        --container-name '$(blobContainerName)' \
+                        --prefix '$(deploymentPath)/' \
+                        --output table
+                
+                - task: AzureCLI@2
+                  displayName: 'Get application URL'
+                  inputs:
+                    azureSubscription: $(azureServiceConnection)
+                    scriptType: 'bash'
+                    scriptLocation: 'inlineScript'
+                    inlineScript: |
+                      az account set --subscription $(subscriptionId)
+                      
+                      echo "Retrieving static website URL..."
+                      WEBSITE_URL=$(az storage account show \
+                        --name $(storageAccountName) \
+                        --resource-group $(storageAccountResourceGroup) \
+                        --query "primaryEndpoints.web" \
+                        --output tsv)
+                      
+                      # Construct full chatbot URL
+                      CHATBOT_URL="${WEBSITE_URL}chatbot/"
+                      
+                      echo "##[section]=========================================="
+                      echo "##[section]   DEPLOYMENT SUCCESSFUL!"
+                      echo "##[section]=========================================="
+                      echo "##[section]"
+                      echo "##[section] Storage Account: $(storageAccountName)"
+                      echo "##[section] Deployment Path: \$web/$(deploymentPath)/"
+                      echo "##[section]"
+                      echo "##[section] Application URL:"
+                      echo "##[section]   $CHATBOT_URL"
+                      echo "##[section]"
+                      echo "##[section]=========================================="
+                      
+                      # Set as pipeline variable
+                      echo "##vso[task.setvariable variable=chatbotUrl;isOutput=true]$CHATBOT_URL"

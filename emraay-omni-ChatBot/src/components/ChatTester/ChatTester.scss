@@ -1,0 +1,128 @@
+@use 'sass:color';
+@use '@/styles/variables.scss' as *;
+
+.chat-tester {
+  background: white;
+  border-radius: $border-radius-md;
+  padding: $spacing-lg;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  max-width: 700px;
+  margin: $spacing-xl auto;
+
+  h3 {
+    margin: 0 0 $spacing-lg 0;
+    color: $secondary-color;
+  }
+
+  &__quick-tests {
+    margin-bottom: $spacing-lg;
+
+    p {
+      margin-bottom: $spacing-sm;
+      font-weight: 500;
+      color: $secondary-color;
+    }
+  }
+
+  &__test-btn {
+    display: block;
+    width: 100%;
+    padding: $spacing-md;
+    margin-bottom: $spacing-sm;
+    background: white;
+    border: 2px solid $primary-color;
+    color: $primary-color;
+    border-radius: $border-radius-sm;
+    cursor: pointer;
+    text-align: left;
+    transition: all $transition-fast;
+
+    &:hover:not(:disabled) {
+      background: $primary-color;
+      color: white;
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+
+  &__custom {
+    display: flex;
+    gap: $spacing-sm;
+    margin-bottom: $spacing-md;
+
+    input {
+      flex: 1;
+      padding: $spacing-md;
+      border: 2px solid $border-color;
+      border-radius: $border-radius-sm;
+      font-size: 1rem;
+
+      &:focus {
+        outline: none;
+        border-color: $primary-color;
+      }
+
+      &:disabled {
+        background: #f5f5f5;
+      }
+    }
+
+    button {
+      padding: $spacing-md $spacing-lg;
+      background: $primary-color;
+      color: white;
+      border: none;
+      border-radius: $border-radius-sm;
+      cursor: pointer;
+      font-weight: 500;
+      transition: background $transition-fast;
+
+      &:hover:not(:disabled) {
+        background: color.scale($primary-color, $lightness: -25%);
+      }
+
+      &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+    }
+  }
+
+  &__session {
+    padding: $spacing-sm $spacing-md;
+    background: #e3f2fd;
+    border-radius: $border-radius-sm;
+    margin-bottom: $spacing-md;
+    font-size: 0.9rem;
+    color: #1976d2;
+
+    code {
+      background: white;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: monospace;
+    }
+  }
+
+  &__response {
+    padding: $spacing-md;
+    background: #f5f5f5;
+    border-radius: $border-radius-sm;
+    border-left: 4px solid $success-color;
+
+    strong {
+      display: block;
+      margin-bottom: $spacing-sm;
+      color: $secondary-color;
+    }
+
+    p {
+      margin: 0;
+      line-height: 1.6;
+      color: $text-light;
+    }
+  }
+}

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mock API Test</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; }
+    .test-section { background: #f5f5f5; padding: 15px; margin: 10px 0; border-radius: 5px; }
+    .success { color: green; }
+    .error { color: red; }
+    button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+    pre { background: #fff; padding: 10px; overflow-x: auto; }
+  </style>
+</head>
+<body>
+  <h1>🎭 Mock API Test Page</h1>
+  
+  <div class="test-section">
+    <h2>Configuration</h2>
+    <div id="config"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>API Tests</h2>
+    <button onclick="testHealth()">Test Health</button>
+    <button onclick="testChat()">Test Chat</button>
+    <button onclick="testProducts()">Test Products</button>
+    <div id="results"></div>
+  </div>
+
+  <script type="module">
+    import { config } from './src/config/config.ts';
+    import { healthService } from './src/services/healthService.ts';
+    import { chatService } from './src/services/chatService.ts';
+    import { productService } from './src/services/productService.ts';
+
+    // Display config
+    document.getElementById('config').innerHTML = `
+      <p><strong>API Base URL:</strong> ${config.apiBaseUrl}</p>
+      <p><strong>API Mode:</strong> <span class="${config.apiMode === 'mock' ? 'success' : 'error'}">${config.apiMode}</span></p>
+      <p><strong>App Title:</strong> ${config.appTitle}</p>
+    `;
+
+    window.testHealth = async () => {
+      const results = document.getElementById('results');
+      results.innerHTML = '<p>Testing health endpoint...</p>';
+      
+      try {
+        const response = await healthService.checkHealth();
+        results.innerHTML = `<div class="success"><h3>✅ Health Check Success</h3><pre>${JSON.stringify(response, null, 2)}</pre></div>`;
+      } catch (error) {
+        results.innerHTML = `<div class="error"><h3>❌ Health Check Failed</h3><pre>${error.message}</pre></div>`;
+      }
+    };
+
+    window.testChat = async () => {
+      const results = document.getElementById('results');
+      results.innerHTML = '<p>Testing chat endpoint...</p>';
+      
+      try {
+        const response = await chatService.sendSimpleMessage('Hello, test message');
+        results.innerHTML = `<div class="success"><h3>✅ Chat Test Success</h3><pre>${JSON.stringify(response, null, 2)}</pre></div>`;
+      } catch (error) {
+        results.innerHTML = `<div class="error"><h3>❌ Chat Test Failed</h3><pre>${error.message}</pre></div>`;
+      }
+    };
+
+    window.testProducts = async () => {
+      const results = document.getElementById('results');
+      results.innerHTML = '<p>Testing products endpoint...</p>';
+      
+      try {
+        const response = await productService.getProducts({ limit: 3 });
+        results.innerHTML = `<div class="success"><h3>✅ Products Test Success</h3><pre>${JSON.stringify(response, null, 2)}</pre></div>`;
+      } catch (error) {
+        results.innerHTML = `<div class="error"><h3>❌ Products Test Failed</h3><pre>${error.message}</pre></div>`;
+      }
+    };
+
+    // Auto-test on load
+    console.log('🎭 Mock API Test Page Loaded');
+    console.log('Config:', config);
+  </script>
+</body>
+</html>

@@ -1,0 +1,20 @@
+{
+  "Servers": {
+    "1": {
+      "Name": "Emraay Smart Shopper DB",
+      "Group": "Servers",
+      "Host": "emraay-postgres",
+      "Port": 5432,
+      "MaintenanceDB": "staples_smart_shopper",
+      "Username": "postgres",
+      "SSLMode": "prefer",
+      "SSLCert": "<STORAGE_DIR>/.postgresql/postgresql.crt",
+      "SSLKey": "<STORAGE_DIR>/.postgresql/postgresql.key",
+      "SSLCompression": 0,
+      "Timeout": 0,
+      "UseSSHTunnel": 0,
+      "TunnelPort": "22",
+      "TunnelAuthentication": 0
+    }
+  }
+}

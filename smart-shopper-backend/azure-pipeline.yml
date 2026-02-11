@@ -1,0 +1,218 @@
+trigger:
+  - main
+
+variables:
+  #
+  # Variables for Development environment
+  #
+  # VM Configuration
+  vmPublicIpDev: "20.220.23.102"
+  vmUserDev: "azureuser"  
+  appPortDev: "3001"
+  containerNameDev: "staples-chatbot-api"
+  
+  # Docker Registry
+  acrRepoNameDev: "enterprisenonpacr"
+  acrRepoDev: "enterprisenonpacr.azurecr.io/ecommerce/staples-chatbot"  
+
+  # Azure Resource Manager connection
+  azureSubscriptionDev: "staples-canada-ulc-hackathon"
+
+stages:
+  # - stage: Test
+  #   displayName: Test stage
+  #   pool:
+  #     vmImage: "ubuntu-latest"
+  #   jobs:
+  #     - job: UnitTestJob
+  #       displayName: Unit Test
+  #       steps:
+  #         - script: |
+  #             yarn --ignore-engines install
+  #           displayName: "yarn install"
+  #         - script: |
+  #             yarn --ignore-engines lint
+  #           displayName: "Run lint"
+  #         - script: |
+  #             yarn --ignore-engines test
+  #           displayName: "Run unit tests"
+
+  - stage: Build
+    displayName: Build App    
+    jobs:
+      - job: BuildJob
+        displayName: Build
+        pool:
+          vmImage: "ubuntu-latest"
+        steps:
+          - script: |
+              echo "Code revision - $(Build.SourceVersion)"
+              SourceVersion=$(Build.SourceVersion)
+              ShortVersion=${SourceVersion:0:7}
+              AppVersion="$(date +'%Y%m%d').$ShortVersion"
+              echo "Build version - $ShortVersion"
+              echo "##vso[task.setvariable variable=Short;isOutput=true]$ShortVersion"
+              echo "##vso[task.setvariable variable=App;isOutput=true]$AppVersion"
+            displayName: "Set version"
+            name: Version
+          - task: AzureCLI@1
+            displayName: "ACR Login"
+            inputs:
+              azureSubscription: "$(azureSubscriptionDev)"
+              scriptLocation: inlineScript
+              inlineScript: |
+                az acr login --name $(acrRepoNameDev)
+          - script: |
+              echo "Building docker image..."
+              docker build \
+                -t $(acrRepoDev):$(Build.SourceBranchName)-$(Version.Short) \
+                -f Dockerfile .
+            displayName: "Build docker image"
+          - script: |
+              echo "Publishing docker image to registry..."
+              docker push $(acrRepoDev):$(Build.SourceBranchName)-$(Version.Short)
+            displayName: "Publish docker image"
+          - task: ArchiveFiles@2.206.0
+            displayName: "Archive .env template"
+            inputs:
+              rootFolderOrFile: ".env.template"
+              includeRootFolder: false
+              archiveFile: "$(Build.ArtifactStagingDirectory)/env-$(Version.Short).zip"  
+          - task: ArchiveFiles@2.206.0
+            displayName: "Archive VM deployment scripts"
+            inputs:
+              rootFolderOrFile: vm-deployment
+              includeRootFolder: true
+              archiveFile: "$(Build.ArtifactStagingDirectory)/deployment-$(Version.Short).zip"
+          - task: PublishBuildArtifacts@1
+            displayName: "Publish build artifacts to Azure Pipelines"
+            inputs:
+              PathtoPublish: "$(Build.ArtifactStagingDirectory)"
+  - stage: DeployToDevEnv
+    displayName: "Dev Deployment"
+    dependsOn: Build
+    condition: and(succeeded('Build'), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+    jobs:
+      - deployment: DeployToVMDev
+        displayName: "Deploy To Azure VM Dev environment"
+        environment: "development"
+        pool:
+          vmImage: "ubuntu-latest"
+        workspace:
+          clean: all
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - script: |
+                    echo "Code revision - $(Build.SourceVersion)"
+                    SourceVersion=$(Build.SourceVersion)
+                    ShortVersion=${SourceVersion:0:7}
+                    AppVersion="$(date +'%Y%m%d').$ShortVersion"
+                    echo "Build version - $ShortVersion"
+                    echo "##vso[task.setvariable variable=Short;isOutput=true]$ShortVersion"
+                    echo "##vso[task.setvariable variable=App;isOutput=true]$AppVersion"
+                  displayName: "Set version"
+                  name: Version
+                
+                - task: ExtractFiles@1
+                  displayName: "Extract deployment files"
+                  inputs:
+                    archiveFilePatterns: "$(Pipeline.Workspace)/drop/*.zip"
+                    destinationFolder: "$(Pipeline.Workspace)/deploy"
+                
+                - task: DownloadSecureFile@1
+                  displayName: "Download SSH private key"
+                  name: sshKey
+                  inputs:
+                    secureFile: 'vm-ssh-private-key'  # Upload your SSH private key to Azure DevOps Secure Files
+                
+                - script: |
+                    # Set SSH key permissions
+                    chmod 600 $(sshKey.secureFilePath)
+                    
+                    # Add VM to known hosts
+                    mkdir -p ~/.ssh
+                    ssh-keyscan -H $(vmPublicIpDev) >> ~/.ssh/known_hosts
+                  displayName: "Configure SSH"
+                
+                - script: |
+                    # Create .env file from template
+                    envsubst < .env.template > .env
+                    cat .env
+                  displayName: "Configure .env file"
+                  workingDirectory: "$(Pipeline.Workspace)/deploy"
+                  env:
+                    DATABASE_URL: "$(DATABASE_URL)"
+                    REDIS_URL: "$(REDIS_URL)"
+                    OPENAI_API_KEY: "$(OPENAI_API_KEY)"
+                    NODE_ENV: "production"
+                    PORT: "3000"
+                
+                - script: |
+                    # Copy .env file to VM
+                    echo "Copying .env file to VM..."
+                    ssh -i $(sshKey.secureFilePath) -o StrictHostKeyChecking=no $(vmUserDev)@$(vmPublicIpDev) 'mkdir -p ~/deployments/staples-chatbot'
+                    scp -i $(sshKey.secureFilePath) -o StrictHostKeyChecking=no .env $(vmUserDev)@$(vmPublicIpDev):~/deployments/staples-chatbot/.env
+                    
+                    # Set proper permissions on .env file
+                    ssh -i $(sshKey.secureFilePath) -o StrictHostKeyChecking=no $(vmUserDev)@$(vmPublicIpDev) 'chmod 600 ~/deployments/staples-chatbot/.env'
+                  displayName: "Copy secrets to VM"
+                  workingDirectory: "$(Pipeline.Workspace)/deploy"
+                
+                - script: |
+                    # Deploy to VM
+                    echo "Deploying application to VM..."
+                    ssh -i $(sshKey.secureFilePath) -o StrictHostKeyChecking=no $(vmUserDev)@$(vmPublicIpDev) << 'ENDSSH'
+                      # Login to Azure Container Registry
+                      echo "Logging into ACR..."
+                      az acr login --name $(acrRepoNameDev)
+                      
+                      # Pull the latest image
+                      echo "Pulling Docker image: $(acrRepoDev):$(Build.SourceBranchName)-$(Version.Short)"
+                      docker pull $(acrRepoDev):$(Build.SourceBranchName)-$(Version.Short)
+                      
+                      # Stop and remove existing container if it exists
+                      echo "Stopping existing container if any..."
+                      docker stop $(containerNameDev) 2>/dev/null || true
+                      docker rm $(containerNameDev) 2>/dev/null || true
+                      
+                      # Run new container
+                      echo "Starting new container..."
+                      docker run -d \
+                          --name $(containerNameDev) \
+                          --restart unless-stopped \
+                          -p 127.0.0.1:$(appPortDev):3000 \
+                          --env-file ~/deployments/staples-chatbot/.env \
+                          -v ~/deployments/staples-chatbot/logs:/app/logs \
+                          $(acrRepoDev):$(Build.SourceBranchName)-$(Version.Short)
+                      
+                      # Wait for application to start
+                      echo "Waiting for application to start..."
+                      sleep 15
+                      
+                      # Health check
+                      echo "Performing health check..."
+                      curl -f http://localhost:$(appPortDev)/api/health || echo "Warning: Health check failed - please verify manually"
+                      
+                      # Show container status
+                      echo "Container status:"
+                      docker ps | grep $(containerNameDev) || echo "Container not found!"
+                      
+                      # Clean up old images (keep last 3)
+                      echo "Cleaning up old Docker images..."
+                      docker images $(acrRepoDev) --format "{{.ID}} {{.CreatedAt}}" | sort -rk 2 | awk 'NR>3 {print $1}' | xargs -r docker rmi 2>/dev/null || true
+                    ENDSSH
+                  displayName: "Deploy Docker container to VM"
+                
+                - script: |
+                    echo "============================================"
+                    echo "Deployment completed successfully!"
+                    echo "============================================"
+                    echo "Application URL: https://$(vmPublicIpDev)/api/chatbot/v1.0/"
+                    echo "Health Check: https://$(vmPublicIpDev)/api/chatbot/v1.0/health"
+                    echo ""
+                    echo "To view logs:"
+                    echo "  ssh $(vmUserDev)@$(vmPublicIpDev) 'docker logs $(containerNameDev)'"
+                    echo "============================================"
+                  displayName: "Deployment summary"  

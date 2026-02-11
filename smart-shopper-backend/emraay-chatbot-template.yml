@@ -1,0 +1,106 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: $K8S_PROJECT-$K8S_ENV-$K8S_APP
+  labels:
+    project: $K8S_PROJECT
+    environment: $K8S_ENV
+    app: $K8S_APP
+spec:
+  type: ClusterIP
+  ports:
+    - port: 3000
+  selector:
+    project: $K8S_PROJECT
+    environment: $K8S_ENV
+    app: $K8S_APP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: $K8S_PROJECT-$K8S_ENV-$K8S_APP
+  labels:
+    project: $K8S_PROJECT
+    environment: $K8S_ENV
+    app: $K8S_APP
+    version: "$K8S_VERSION"
+    tags.datadoghq.com/service: $K8S_PROJECT-$K8S_APP
+spec:
+  replicas: $K8S_APP_REPLICAS
+  selector:
+    matchLabels:
+      project: $K8S_PROJECT
+      environment: $K8S_ENV
+      app: $K8S_APP
+  template:
+    metadata:
+      labels:
+        project: $K8S_PROJECT
+        environment: $K8S_ENV
+        app: $K8S_APP
+        version: "$K8S_VERSION"
+        tags.datadoghq.com/service: $K8S_PROJECT-$K8S_APP
+    spec:
+      nodeSelector:
+        "kubernetes.azure.com/agentpool": digital
+      containers:
+        - name: $K8S_PROJECT-$K8S_ENV-$K8S_APP
+          image: $K8S_IMAGE_URI:$K8S_IMAGE_TAG
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3000
+          env:
+            - name: DD_AGENT_HOST
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
+            - name: DD_ENV
+              value: sc-$K8S_PROJECT-$K8S_ENV
+            - name: DD_SERVICE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.labels['tags.datadoghq.com/service']
+            - name: DD_VERSION
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.labels['version']
+            - name: DD_LOGS_INJECTION
+              value: "true"
+            - name: DD_TRACE_SAMPLE_RATE
+              value: "1"
+            - name: DD_RUNTIME_METRICS_ENABLED
+              value: "true"
+            - name: DD_KUBERNETES_POD_LABELS_AS_TAGS
+              value: '{"project":"app"}'
+          envFrom:
+            - secretRef:
+                name: $K8S_PROJECT-$K8S_ENV-$K8S_APP-dotenv-secret    
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: $K8S_PROJECT-$K8S_ENV-$K8S_APP-ingress
+  labels:
+    project: $K8S_PROJECT
+    environment: $K8S_ENV
+    app: $K8S_APP
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    # nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+spec:
+  tls:
+    - hosts:
+        - $K8S_APP_FQDN
+  rules:
+    - host: $K8S_APP_FQDN
+      http:
+        paths:
+          - path: /ecommerce/chatbot/v1.0(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: $K8S_PROJECT-$K8S_ENV-$K8S_APP
+                port:
+                  number: 3000

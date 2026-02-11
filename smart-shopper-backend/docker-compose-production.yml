@@ -1,0 +1,145 @@
+version: '3.8'
+
+services:
+  # Nginx Reverse Proxy (NEW)
+  proxy:
+    image: nginx:alpine
+    container_name: emraay-proxy
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx-proxy.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - backend
+      - chatbot
+    networks:
+      - emraay-network
+    restart: unless-stopped
+
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: emraay-postgres
+    environment:
+      POSTGRES_DB: staples_smart_shopper
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    networks:
+      - emraay-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis for session management and caching
+  redis:
+    image: redis:7-alpine
+    container_name: emraay-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - emraay-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend API Service
+  backend:
+    build: 
+      context: .
+      target: production
+    container_name: emraay-backend
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - DATABASE_URL=postgresql://postgres:postgres123@postgres:5432/staples_smart_shopper
+      - REDIS_URL=redis://redis:6379
+      - CHROMA_URL=http://chroma:8000
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - PINECONE_API_KEY=${PINECONE_API_KEY}
+      - PINECONE_ENVIRONMENT=${PINECONE_ENVIRONMENT}
+      - PINECONE_INDEX_NAME=${PINECONE_INDEX_NAME}
+    # Remove external port exposure (proxy handles this)
+    expose:
+      - "3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - emraay-network
+    restart: unless-stopped
+
+  # Frontend Chatbot Service
+  chatbot:
+    build:
+      context: ../emraay-omni-ChatBot
+      dockerfile: Dockerfile-improved
+    container_name: emraay-chatbot
+    environment:
+      - NODE_ENV=production
+      - VITE_API_BASE_URL=http://localhost/api
+      - VITE_APP_TITLE=Staples Smart Shopper
+      - VITE_APP_LOCALE=en-CA
+      - VITE_API_MODE=live
+    # Remove external port exposure (proxy handles this)
+    expose:
+      - "3000"
+    depends_on:
+      - backend
+    networks:
+      - emraay-network
+    restart: unless-stopped
+
+  # ChromaDB for vector search  
+  chroma:
+    image: chromadb/chroma:latest
+    container_name: emraay-chroma
+    ports:
+      - "8000:8000"
+    volumes:
+      - chroma_data:/chroma/chroma
+    environment:
+      - IS_PERSISTENT=TRUE
+      - PERSIST_DIRECTORY=/chroma/chroma
+    networks:
+      - emraay-network
+    restart: unless-stopped
+
+  # pgAdmin for database management (optional)
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: emraay-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@emraay.com
+      PGLADMIN_DEFAULT_PASSWORD: admin123
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+      - ./pgadmin/servers.json:/pgadmin4/servers.json
+    depends_on:
+      - postgres
+    networks:
+      - emraay-network
+
+volumes:
+  postgres_data:
+  redis_data:
+  pgadmin_data:
+  chroma_data:
+
+networks:
+  emraay-network:
+    driver: bridge

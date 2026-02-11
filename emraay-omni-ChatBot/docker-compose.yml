@@ -1,0 +1,34 @@
+services:
+  chatbot:
+    build:
+      context: .
+      args:
+        - VITE_API_BASE_URL=${VITE_API_BASE_URL:-http://localhost:3000/api}
+        - VITE_API_MODE=${VITE_API_MODE:-live}
+        - VITE_APP_TITLE=${VITE_APP_TITLE:-Staples Smart Shopper}
+        - VITE_APP_LOCALE=${VITE_APP_LOCALE:-en-CA}
+    ports:
+      - "8080:3000"
+    environment:
+      - NODE_ENV=production
+      - VITE_API_BASE_URL=${VITE_API_BASE_URL:-http://localhost:3000}
+      - VITE_APP_TITLE=${VITE_APP_TITLE:-Staples Smart Shopper}
+      - VITE_APP_LOCALE=${VITE_APP_LOCALE:-en-CA}
+      - VITE_API_MODE=${VITE_API_MODE:-live}
+    env_file:
+      - .env
+    restart: unless-stopped
+    container_name: staples-omni-chatbot
+    networks:
+      - chatbot-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  chatbot-network:
+    driver: bridge
+    external: false

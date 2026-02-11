@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1200" height="900" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="1200" height="900" fill="#f8f9fa"/>
+  
+  <!-- Title -->
+  <text x="600" y="30" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#1a1a1a">
+    Staples Smart Shopper Backend - Architecture Diagram
+  </text>
+  
+  <!-- Client Layer -->
+  <rect x="50" y="60" width="1100" height="80" fill="#e3f2fd" stroke="#1976d2" stroke-width="2" rx="8"/>
+  <text x="600" y="85" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#1976d2">
+    CLIENT LAYER
+  </text>
+  <rect x="80" y="100" width="150" height="30" fill="#bbdefb" stroke="#1976d2" rx="4"/>
+  <text x="155" y="118" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#0d47a1">Frontend Apps</text>
+  <rect x="250" y="100" width="150" height="30" fill="#bbdefb" stroke="#1976d2" rx="4"/>
+  <text x="325" y="118" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#0d47a1">Mobile Apps</text>
+  <rect x="420" y="100" width="150" height="30" fill="#bbdefb" stroke="#1976d2" rx="4"/>
+  <text x="495" y="118" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#0d47a1">Chatbot Interface</text>
+  <rect x="590" y="100" width="150" height="30" fill="#bbdefb" stroke="#1976d2" rx="4"/>
+  <text x="665" y="118" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#0d47a1">API Consumers</text>
+  
+  <!-- API Gateway Layer -->
+  <rect x="50" y="170" width="1100" height="120" fill="#fff3e0" stroke="#f57c00" stroke-width="2" rx="8"/>
+  <text x="600" y="195" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#f57c00">
+    API GATEWAY LAYER (Express.js + TypeScript)
+  </text>
+  <rect x="80" y="210" width="120" height="30" fill="#ffcc80" stroke="#f57c00" rx="4"/>
+  <text x="140" y="228" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#e65100">CORS</text>
+  <rect x="220" y="210" width="120" height="30" fill="#ffcc80" stroke="#f57c00" rx="4"/>
+  <text x="280" y="228" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#e65100">Rate Limiting</text>
+  <rect x="360" y="210" width="120" height="30" fill="#ffcc80" stroke="#f57c00" rx="4"/>
+  <text x="420" y="228" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#e65100">Authentication</text>
+  <rect x="500" y="210" width="120" height="30" fill="#ffcc80" stroke="#f57c00" rx="4"/>
+  <text x="560" y="228" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#e65100">Logging</text>
+  <rect x="640" y="210" width="120" height="30" fill="#ffcc80" stroke="#f57c00" rx="4"/>
+  <text x="700" y="228" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#e65100">Health Checks</text>
+  
+  <rect x="80" y="250" width="100" height="30" fill="#ffab40" stroke="#f57c00" rx="4"/>
+  <text x="130" y="268" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#e65100">Port: 3000</text>
+  
+  <!-- Business Logic Layer -->
+  <rect x="50" y="320" width="1100" height="160" fill="#e8f5e8" stroke="#388e3c" stroke-width="2" rx="8"/>
+  <text x="600" y="345" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#388e3c">
+    BUSINESS LOGIC LAYER - API ROUTES & SERVICES
+  </text>
+  
+  <!-- API Routes -->
+  <rect x="80" y="360" width="140" height="40" fill="#c8e6c9" stroke="#388e3c" rx="4"/>
+  <text x="150" y="378" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#1b5e20">Products API</text>
+  <text x="150" y="390" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#2e7d32">/api/products</text>
+  
+  <rect x="240" y="360" width="140" height="40" fill="#c8e6c9" stroke="#388e3c" rx="4"/>
+  <text x="310" y="378" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#1b5e20">Chat API</text>
+  <text x="310" y="390" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#2e7d32">/api/chat</text>
+  
+  <rect x="400" y="360" width="140" height="40" fill="#c8e6c9" stroke="#388e3c" rx="4"/>
+  <text x="470" y="378" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#1b5e20">FAQ API</text>
+  <text x="470" y="390" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#2e7d32">/api/faq</text>
+  
+  <rect x="560" y="360" width="140" height="40" fill="#c8e6c9" stroke="#388e3c" rx="4"/>
+  <text x="630" y="378" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#1b5e20">Upload API</text>
+  <text x="630" y="390" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#2e7d32">/api/upload</text>
+  
+  <rect x="720" y="360" width="140" height="40" fill="#c8e6c9" stroke="#388e3c" rx="4"/>
+  <text x="790" y="378" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#1b5e20">Analytics API</text>
+  <text x="790" y="390" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#2e7d32">/api/analytics</text>
+  
+  <!-- Services -->
+  <rect x="80" y="420" width="120" height="40" fill="#a5d6a7" stroke="#388e3c" rx="4"/>
+  <text x="140" y="438" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#1b5e20">OpenAI Service</text>
+  <text x="140" y="450" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#2e7d32">GPT-4o-mini</text>
+  
+  <rect x="220" y="420" width="120" height="40" fill="#a5d6a7" stroke="#388e3c" rx="4"/>
+  <text x="280" y="438" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#1b5e20">FAQ Service</text>
+  <text x="280" y="450" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#2e7d32">RAG Optimized</text>
+  
+  <rect x="360" y="420" width="120" height="40" fill="#a5d6a7" stroke="#388e3c" rx="4"/>
+  <text x="420" y="438" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#1b5e20">Product Service</text>
+  <text x="420" y="450" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#2e7d32">9,999 Products</text>
+  
+  <rect x="500" y="420" width="120" height="40" fill="#a5d6a7" stroke="#388e3c" rx="4"/>
+  <text x="560" y="438" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#1b5e20">ChromaDB Service</text>
+  <text x="560" y="450" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#2e7d32">Vector Search</text>
+  
+  <rect x="640" y="420" width="120" height="40" fill="#a5d6a7" stroke="#388e3c" rx="4"/>
+  <text x="700" y="438" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#1b5e20">Analytics Service</text>
+  <text x="700" y="450" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#2e7d32">Tracking</text>
+  
+  <!-- Data Layer -->
+  <rect x="50" y="510" width="1100" height="160" fill="#fce4ec" stroke="#c2185b" stroke-width="2" rx="8"/>
+  <text x="600" y="535" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#c2185b">
+    DATA PERSISTENCE LAYER
+  </text>
+  
+  <!-- Databases -->
+  <rect x="80" y="550" width="180" height="50" fill="#f8bbd9" stroke="#c2185b" rx="4"/>
+  <text x="170" y="570" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#880e4f">PostgreSQL</text>
+  <text x="170" y="585" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#ad1457">Products, Chat History, Sessions</text>
+  
+  <rect x="280" y="550" width="180" height="50" fill="#f8bbd9" stroke="#c2185b" rx="4"/>
+  <text x="370" y="570" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#880e4f">Redis</text>
+  <text x="370" y="585" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#ad1457">Cache, Sessions, Rate Limiting</text>
+  
+  <rect x="480" y="550" width="180" height="50" fill="#f8bbd9" stroke="#c2185b" rx="4"/>
+  <text x="570" y="570" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#880e4f">ChromaDB</text>
+  <text x="570" y="585" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#ad1457">Vector Embeddings, Semantic Search</text>
+  
+  <rect x="680" y="550" width="180" height="50" fill="#f8bbd9" stroke="#c2185b" rx="4"/>
+  <text x="770" y="570" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#880e4f">File System</text>
+  <text x="770" y="585" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#ad1457">Image Uploads, Static Files</text>
+  
+  <!-- Ports -->
+  <text x="170" y="620" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#880e4f">Port: 5432</text>
+  <text x="370" y="620" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#880e4f">Port: 6379</text>
+  <text x="570" y="620" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#880e4f">Port: 8000</text>
+  <text x="770" y="620" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#880e4f">./uploads/</text>
+  
+  <!-- External Services -->
+  <rect x="50" y="700" width="1100" height="100" fill="#f3e5f5" stroke="#7b1fa2" stroke-width="2" rx="8"/>
+  <text x="600" y="725" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#7b1fa2">
+    EXTERNAL SERVICES & INTEGRATIONS
+  </text>
+  
+  <rect x="100" y="740" width="200" height="40" fill="#e1bee7" stroke="#7b1fa2" rx="4"/>
+  <text x="200" y="758" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#4a148c">OpenAI API</text>
+  <text x="200" y="770" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#6a1b9a">GPT-4o-mini Chat Completions</text>
+  
+  <rect x="320" y="740" width="200" height="40" fill="#e1bee7" stroke="#7b1fa2" rx="4"/>
+  <text x="420" y="758" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#4a148c">Staples Help Center</text>
+  <text x="420" y="770" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#6a1b9a">help.staples.ca (FAQ Source)</text>
+  
+  <rect x="540" y="740" width="200" height="40" fill="#e1bee7" stroke="#7b1fa2" rx="4"/>
+  <text x="640" y="758" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#4a148c">Azure DevOps</text>
+  <text x="640" y="770" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#6a1b9a">Git Repository & CI/CD</text>
+  
+  <rect x="760" y="740" width="200" height="40" fill="#e1bee7" stroke="#7b1fa2" rx="4"/>
+  <text x="860" y="758" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#4a148c">pgAdmin</text>
+  <text x="860" y="770" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#6a1b9a">Database Administration</text>
+  
+  <!-- Infrastructure -->
+  <rect x="50" y="820" width="1100" height="60" fill="#e0f2f1" stroke="#00695c" stroke-width="2" rx="8"/>
+  <text x="600" y="845" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#00695c">
+    INFRASTRUCTURE LAYER
+  </text>
+  
+  <rect x="100" y="855" width="150" height="20" fill="#b2dfdb" stroke="#00695c" rx="4"/>
+  <text x="175" y="867" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#004d40">Docker Compose</text>
+  
+  <rect x="270" y="855" width="150" height="20" fill="#b2dfdb" stroke="#00695c" rx="4"/>
+  <text x="345" y="867" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#004d40">5 Containerized Services</text>
+  
+  <rect x="440" y="855" width="150" height="20" fill="#b2dfdb" stroke="#00695c" rx="4"/>
+  <text x="515" y="867" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#004d40">Health Monitoring</text>
+  
+  <rect x="610" y="855" width="150" height="20" fill="#b2dfdb" stroke="#00695c" rx="4"/>
+  <text x="685" y="867" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#004d40">Auto-Restart Policies</text>
+  
+  <rect x="780" y="855" width="150" height="20" fill="#b2dfdb" stroke="#00695c" rx="4"/>
+  <text x="855" y="867" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#004d40">Environment Config</text>
+  
+  <!-- Flow Arrows -->
+  <!-- Client to API Gateway -->
+  <path d="M 600 140 L 600 170" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)" fill="none"/>
+  
+  <!-- API Gateway to Business Logic -->
+  <path d="M 600 290 L 600 320" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)" fill="none"/>
+  
+  <!-- Business Logic to Data Layer -->
+  <path d="M 600 480 L 600 510" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)" fill="none"/>
+  
+  <!-- Business Logic to External Services -->
+  <path d="M 300 480 Q 250 600 300 700" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)" fill="none"/>
+  
+  <!-- Arrow marker definition -->
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" 
+     refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#333" />
+    </marker>
+  </defs>
+  
+  <!-- Key Features Box -->
+  <rect x="900" y="60" width="280" height="200" fill="#fff" stroke="#666" stroke-width="1" rx="4"/>
+  <text x="1040" y="85" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#333">
+    🎯 KEY FEATURES
+  </text>
+  
+  <text x="910" y="105" font-family="Arial, sans-serif" font-size="11" fill="#333">
+    ✅ 9,999 Staples Canada Products
+  </text>
+  <text x="910" y="120" font-family="Arial, sans-serif" font-size="11" fill="#333">
+    ✅ AI-Powered Chat (GPT-4o-mini)
+  </text>
+  <text x="910" y="135" font-family="Arial, sans-serif" font-size="11" fill="#333">
+    ✅ RAG-Optimized FAQ System
+  </text>
+  <text x="910" y="150" font-family="Arial, sans-serif" font-size="11" fill="#333">
+    ✅ Vector Search (ChromaDB)
+  </text>
+  <text x="910" y="165" font-family="Arial, sans-serif" font-size="11" fill="#333">
+    ✅ Session-Based Conversations
+  </text>
+  <text x="910" y="180" font-family="Arial, sans-serif" font-size="11" fill="#333">
+    ✅ Image Upload & Analysis
+  </text>
+  <text x="910" y="195" font-family="Arial, sans-serif" font-size="11" fill="#333">
+    ✅ Real-time Analytics
+  </text>
+  <text x="910" y="210" font-family="Arial, sans-serif" font-size="11" fill="#333">
+    ✅ RESTful API Architecture
+  </text>
+  <text x="910" y="225" font-family="Arial, sans-serif" font-size="11" fill="#333">
+    ✅ Docker Containerization
+  </text>
+  <text x="910" y="240" font-family="Arial, sans-serif" font-size="11" fill="#333">
+    ✅ TypeScript + Express.js
+  </text>
+  
+  <!-- Version Info -->
+  <text x="50" y="890" font-family="Arial, sans-serif" font-size="10" fill="#666">
+    Version: 1.6.0 | Last Updated: January 27, 2026 | Status: Production Ready
+  </text>
+</svg>

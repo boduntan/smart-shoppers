@@ -1,0 +1,155 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Product {
+  id              String                  @id @default(cuid())
+  title           String
+  bodyHtml        String?                 @map("body_html")
+  vendor          String
+  url             String
+  category        String?
+  price           Decimal?                @db.Decimal(10, 2)
+  originalPrice   Decimal?                @map("original_price") @db.Decimal(10, 2)
+  inStock         Boolean                 @default(true) @map("in_stock")
+  rating          Float?
+  reviewCount     Int?                    @map("review_count")
+  specifications  Json?
+  images          String[]
+  tags            String[]
+  embeddings      Float[]
+  createdAt       DateTime                @default(now()) @map("created_at")
+  updatedAt       DateTime                @updatedAt @map("updated_at")
+  analyticsEvents AnalyticsEvent[]
+  cartItems       CartItem[]
+  comparisonItems ProductComparisonItem[]
+
+  @@index([vendor])
+  @@index([category])
+  @@index([inStock])
+  @@index([price])
+  @@map("products")
+}
+
+model Conversation {
+  id              String           @id @default(cuid())
+  sessionId       String           @map("session_id")
+  userId          String?          @map("user_id")
+  messages        Json[]
+  context         Json?
+  intent          String?
+  isActive        Boolean          @default(true) @map("is_active")
+  escalated       Boolean          @default(false)
+  escalatedAt     DateTime?        @map("escalated_at")
+  metadata        Json?
+  createdAt       DateTime         @default(now()) @map("created_at")
+  updatedAt       DateTime         @updatedAt @map("updated_at")
+  analyticsEvents AnalyticsEvent[]
+
+  @@index([sessionId])
+  @@index([userId])
+  @@index([isActive])
+  @@map("conversations")
+}
+
+model ChatMessage {
+  id        String   @id @default(cuid())
+  sessionId String   @map("session_id")
+  role      String
+  content   String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([sessionId])
+  @@map("chat_messages")
+}
+
+model ProductComparison {
+  id             String                  @id @default(cuid())
+  sessionId      String                  @map("session_id")
+  comparisonData Json                    @map("comparison_data")
+  createdAt      DateTime                @default(now()) @map("created_at")
+  items          ProductComparisonItem[]
+
+  @@index([sessionId])
+  @@map("product_comparisons")
+}
+
+model ProductComparisonItem {
+  id           String            @id @default(cuid())
+  comparisonId String            @map("comparison_id")
+  productId    String            @map("product_id")
+  comparison   ProductComparison @relation(fields: [comparisonId], references: [id], onDelete: Cascade)
+  product      Product           @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([comparisonId, productId])
+  @@map("product_comparison_items")
+}
+
+model CartItem {
+  id        String   @id @default(cuid())
+  sessionId String   @map("session_id")
+  productId String   @map("product_id")
+  quantity  Int      @default(1)
+  addedAt   DateTime @default(now()) @map("added_at")
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([sessionId, productId])
+  @@index([sessionId])
+  @@map("cart_items")
+}
+
+model AnalyticsEvent {
+  id             String        @id @default(cuid())
+  sessionId      String        @map("session_id")
+  conversationId String?       @map("conversation_id")
+  productId      String?       @map("product_id")
+  eventType      String        @map("event_type")
+  eventData      Json?         @map("event_data")
+  userId         String?       @map("user_id")
+  userAgent      String?       @map("user_agent")
+  ipAddress      String?       @map("ip_address")
+  timestamp      DateTime      @default(now())
+  conversation   Conversation? @relation(fields: [conversationId], references: [id])
+  product        Product?      @relation(fields: [productId], references: [id])
+
+  @@index([sessionId])
+  @@index([eventType])
+  @@index([timestamp])
+  @@map("analytics_events")
+}
+
+model FAQ {
+  id         String   @id @default(cuid())
+  question   String
+  answer     String
+  category   String
+  keywords   String[]
+  priority   Int      @default(0)
+  isActive   Boolean  @default(true) @map("is_active")
+  embeddings Float[]
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  @@index([category])
+  @@index([isActive])
+  @@map("faqs")
+}
+
+model UserSession {
+  id           String   @id @default(cuid())
+  sessionId    String   @unique @map("session_id")
+  userId       String?  @map("user_id")
+  postalCode   String?  @map("postal_code")
+  preferences  Json?
+  lastActivity DateTime @default(now()) @map("last_activity")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@index([sessionId])
+  @@index([userId])
+  @@map("user_sessions")
+}

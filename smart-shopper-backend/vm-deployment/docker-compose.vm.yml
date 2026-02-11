@@ -1,0 +1,54 @@
+version: '3.8'
+
+# Docker Compose configuration for running multiple APIs on Azure VM
+# This is an alternative to running Docker containers manually
+
+services:
+  staples-chatbot:
+    image: ${DOCKER_IMAGE}:${DOCKER_TAG}
+    container_name: staples-chatbot-api
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3001:3000"
+    env_file:
+      - .env
+    volumes:
+      - ./logs/chatbot:/app/logs
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Uncomment and configure when deploying the second API
+  # other-api:
+  #   image: ${OTHER_API_IMAGE}:${OTHER_API_TAG}
+  #   container_name: other-api
+  #   restart: unless-stopped
+  #   ports:
+  #     - "127.0.0.1:3002:3000"
+  #   env_file:
+  #     - ../other-api/.env
+  #   volumes:
+  #     - ./logs/other-api:/app/logs
+  #   healthcheck:
+  #     test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
+  #     start_period: 40s
+  #   logging:
+  #     driver: "json-file"
+  #     options:
+  #       max-size: "10m"
+  #       max-file: "3"
+
+networks:
+  default:
+    name: staples-api-network

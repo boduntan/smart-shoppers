@@ -1,0 +1,72 @@
+﻿Requirement ,Area,Priority,Notes
+A chat should be expandable (collapse/expand without losing state),General,Must Have,
+A chat should be accessible from all Staples.ca pages (consistent entry point),General,Must Have,
+"A chat should start with the following message:
+Hi! I’m the Staples AI Assistant.
+I can help you find the right products, compare options, and answer questions about shipping, returns, and orders.
+What are you shopping for today?
+System note:
+AI can make mistakes. Please double-check product details, pricing, and availability on the product page.",General,Must Have,
+A user should be able to minimize chat and continue browsing without losing the conversation,General,Must Have,
+A user should be able to restart the conversation (clear chat / start over),General,Must Have,
+"For a broad request (e.g., “I need a new laptop”), the AI assistant should ask follow-up questions to clarify needs before recommending products",Reccomendations,Must Have,
+The assistant should ask no more than 3 clarifying questions before showing results (to avoid friction),General,Must Have,
+The assistant should recommend products based only on Staples.ca catalog results ,Reccomendations,Must Have,
+"Recommendations should include: product name, price (if available), key specs, rating (if available), and a link to PDP",General,Must Have,
+The assistant should support product comparison between 2–3 products (side-by-side key differences),Comparison,Must Have,
+"The assistant should summarize a product page in plain language (top specs, best-for, pros/cons)",General,Must Have,
+"The assistant should answer FAQs (shipping, returns, warranty, price match) using Staples FAQ",General,Must Have,https://help.staples.ca/hc/en-us?_gl=1*1y5e4xx*_gcl_au*MTIzODI2MTEzOS4xNzY3MTkzNTg1
+The assistant should recognize when a user request is not shopping-related and respond appropriately (redirect to support or site navigation),General,Must Have,
+"The assistant should provide “Why this recommendation” explanation (e.g., matches budget, use case, key specs)",General,Must Have,
+"The assistant should escalate to a live agent on request (“talk to someone”, “call me”, “agent”). It can also show phone number to contact support",General,Must Have,
+"The assistant should log analytics events: chat opened, intent detected, questions asked, results shown, PDP clicks, add-to-cart, handoff",General,Should Have,
+The assistant should communicate when the item is out of stock,General,Should Have,
+,,,
+"When a customer asks for a product recommendation, the AI assistant should display no more than two (2) recommended products in the chat.",Reccomendations,Must Have,
+Each recommended product must include a direct link to its Product Detail Page (PDP).,Reccomendations,Must Have,
+"If a recommended product is out of stock or unavailable for the customer, the assistant must clearly communicate this in the response.",Reccomendations,Must Have,
+"Product recommendations must be location-aware and based on the customer’s postal code, when available on Staples.ca, to reflect accurate availability and fulfillment options.",Reccomendations,Must Have,
+"For each recommended product, the AI assistant must explain why it was recommended, explicitly tying the reasoning to the customer’s original request and any follow-up answers provided during the conversation.",Reccomendations,Must Have,
+"After presenting 1–2 recommended products, the assistant should offer the customer an option to view the full catalog or additional results via a link (e.g., “See more options”).",Reccomendations,Must Have,
+"If aligns with the request, the AI assestant should reccomend a staples brand item.",Reccomendations,,
+"When a customer asks to compare products, the AI assistant should support side-by-side comparison of up to 3 products in the chat.",,,
+"Compared products must be from the Staples.ca catalog and selectable either by:
+explicit product names/SKUs provided by the customer, or
+products previously recommended or viewed during the conversation.",,,
+"The comparison should be presented in a structured table format, clearly separating features and values per product.",,,
+"The comparison table should include key product attributes only (e.g., processor, memory, storage), based on category-specific comparison rules.",,,
+Each compared product must include a direct link to its Product Detail Page (PDP).,,,
+"If a customer asks to compare more than 2 products, the AI assistant should communicate that only 2 products can be compared at a time and ask a customer to select which products.",,,
+,,,
+"When a customer asks a FAQ-related question (e.g., shipping, returns, warranties, price match), the AI assistant must provide the response based only on information from the official Staples FAQ ",,,
+"FAQ responses must be written in plain English, avoiding internal terminology, legal language, or system-specific wording.",,,
+"When a customer asks to connect with a live agent (e.g., “talk to someone,” “call support,” “agent”), the assistant must clearly inform the customer of the available options, including:
+the ability to contact a live agent by phone, and/or
+the ability to redirect the customer to a live chat with a Staples associate, when supported.",,,
+"When a customer asks follow-up questions about a specific product, the AI assistant must respond using that specific product’s data from the Staples.ca catalog.
+",,,
+"Productresponses must include availability and fulfillment information, when available, such as:
+whether the product is available,
+whether it is currently in stock,
+delivery options (e.g., ship to home),
+pickup options, including in-store pickup and CMD pickup, where supported.",,,
+"If real-time availability data is unavailable, the assistant must clearly communicate this and direct the customer to the PDP for confirmation.",,,
+"Each AI assistant response in the chat must include feedback controls, allowing the customer to provide:
+a thumbs up for helpful responses, or
+a thumbs down for unhelpful or incorrect responses.",,Should Have,
+"When a customer expresses purchase intent (e.g., “I’ll buy this,” “I’m going to order it,” “This works for me”), the AI assistant must inform the customer that the product can be added to the cart from the Product Detail Page (PDP).",,,
+The assistant should clearly guide the customer to the PDP link to complete the add-to-cart action and proceed with checkout.,,,
+"When the AI assistant receives confirmation or high confidence signals that a customer intends to purchase a product, the assistant should provide contextually relevant follow-up recommendations (cross-sell).",,,
+Cross-sell recommendations should be limited to 1–2 additional items to avoid overwhelming the customer.,,,
+"Each cross-sell recommendation must include:
+product name,
+a brief explanation of why it is recommended, and
+a direct link to the PDP.",,,
+Cross-sell recommendations must be in stock,,,
+"When a recommended or discussed product is out of stock or unavailable, the AI assistant must clearly communicate this to the customer.",,,
+"In out-of-stock scenarios, the assistant should proactively offer alternatives, including:
+1–2 similar or equivalent product recommendations that are in stock, or
+an option to view the full catalog for that product category via a link.",,,
+The assistant must not recommend or imply purchase of out-of-stock items unless the customer asked for this specific item,,,
+Conversation history / “resume where I left off” ,,,
+Multiple chats,,,

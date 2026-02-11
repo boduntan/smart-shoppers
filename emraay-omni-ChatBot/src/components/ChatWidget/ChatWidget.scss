@@ -1,0 +1,8 @@
+@use '@/styles/variables.scss' as *;
+
+.chat-widget {
+  position: fixed;
+  bottom: $spacing-lg;
+  right: $spacing-lg;
+  z-index: $z-index-modal;
+}
